@@ -22,6 +22,7 @@ import java.util.Map;
 import com.jfinal.kit.HashKit;
 import com.jfinal.kit.StrKit;
 import com.jfinal.template.expr.ast.MethodKit;
+import com.jfinal.template.source.ClassPathSourceFactory;
 import com.jfinal.template.source.ISource;
 import com.jfinal.template.source.ISourceFactory;
 import com.jfinal.template.source.StringSource;
@@ -281,10 +282,22 @@ public class Engine {
 	
 	/**
 	 * Add directive
+	 * <pre>
+	 * 示例：
+	 * addDirective("now", NowDirective.class)
+	 * </pre>
 	 */
-	public Engine addDirective(String directiveName, Directive directive) {
-		config.addDirective(directiveName, directive);
+	public Engine addDirective(String directiveName, Class<? extends Directive> directiveClass) {
+		config.addDirective(directiveName, directiveClass);
 		return this;
+	}
+	
+	/**
+	 * 该方法已被 addDirective(String, Class<? extends Directive>) 所代替
+	 */
+	@Deprecated
+	public Engine addDirective(String directiveName, Directive directive) {
+		return addDirective(directiveName, directive.getClass());
 	}
 	
 	/**
@@ -414,6 +427,13 @@ public class Engine {
 		return this;
 	}
 	
+	/**
+	 * 设置为 ClassPathSourceFactory 的快捷方法
+	 */
+	public Engine setToClassPathSourceFactory() {
+		return setSourceFactory(new ClassPathSourceFactory());
+	}
+	
 	public ISourceFactory getSourceFactory() {
 		return sourceFactory;
 	}
@@ -445,6 +465,11 @@ public class Engine {
 		return config.getEncoding();
 	}
 	
+	public Engine setWriterBufferSize(int bufferSize) {
+		config.setWriterBufferSize(bufferSize);
+		return this;
+	}
+	
 	/**
 	 * Engine 独立设置为 devMode 可以方便模板文件在修改后立即生效，
 	 * 但如果在 devMode 之下并不希望对 addSharedFunction(...)，
@@ -466,7 +491,7 @@ public class Engine {
 	}
 	
 	public static void removeExtensionMethod(Class<?> targetClass, Object objectOfExtensionClass) {
-		MethodKit.removeExtensionMethod(targetClass, objectOfExtensionClass);;
+		MethodKit.removeExtensionMethod(targetClass, objectOfExtensionClass);
 	}
 	
 	public static void removeExtensionMethod(Class<?> targetClass, Class<?> extensionClass) {
